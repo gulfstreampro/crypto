@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>My 3D Model</title>
   <meta charset="UTF-8">
@@ -25,21 +24,18 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
     }
 
-    #loading-screen img {
+    #loading-screen .loader img {
       width: 145px;
       height: 115px;
       animation: rotate 2s linear infinite;
     }
-
-    #loading-progress {
-      width: 120px;
-      height: 20px;
-      margin-top: 10px;
-      background-color: #fff;
-      position: relative;
+    #loading-screen .loader p {
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+      margin-top: 20px;
     }
 
     @keyframes rotate {
@@ -52,25 +48,24 @@
       }
     }
   </style>
-
 </head>
 
 <body>
   <div id="loading-screen">
-    <img src="/textures/loading.png" alt="Loading...">
-    <div id="loading-progress">
-      <div id="loading-progress-fill"></div>
+    <div class="loader">
+      <img src="./loading.png" alt="Logo">
+      <p>Please wait...</p>
     </div>
   </div>
+
   <div id="container"></div>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/loaders/RGBELoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/pmrem/PMREMGenerator.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/pmrem/PMREMCubeUVPacker.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.min.js"></script>
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/r130/examples/js/loaders/HDRCubeTextureLoader.js"></script>
+
 
 
   <script>
@@ -84,69 +79,43 @@
 
     function init() {
       // create camera with perspective view
-      camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5.6;
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 7.6;
 
       // create scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x122334);
 
+ // add model
+var loader = new THREE.GLTFLoader();
+loader.load('./model/model.gltf', function (gltf) {
+  model = gltf.scene;
+  model.scale.set(0.017, 0.017, 0.017);
 
-      // Create light
-      var light = new THREE.PointLight(0xffffff, 2.1);
-      light.position.set(0, -1, 0);
-      scene.add(light);
+  // add emissive materials to the model and the tracks
+  model.traverse((child) => {
+    if (child.isMesh) {
+      const emissiveMaterial = new THREE.MeshStandardMaterial({
+        map: child.material.map,
+        metalness: 0,
+        roughness: 0,
+        emissive: new THREE.Color(0xffbc54), 
+        emissiveIntensity: 0.09,
+        transmission: 0.8, 
+        ior: 1.5,
 
-      // Create light
-      var light = new THREE.PointLight(0xffffff, 1);
-      light.position.set(0, 1, 0);
-      scene.add(light);
+      });
 
-      // add model 
-      var loader = new THREE.GLTFLoader();
-      loader.load('/model/crypto.gltf', function (gltf) {
-        model = gltf.scene;
-        model.scale.set(0.22, 0.22, 0.22);
-        // add emissive materials to the model and the tracks
-        model.traverse((child) => {
-          if (child.isMesh) {
-            const emissiveMaterial = new THREE.MeshStandardMaterial({
-              map: child.material.map,
-              emissiveMap: child.material.map,
-              roughnessMap: child.material.roughnessMap,
-              normalMap: child.material.normalMap,
-              metalness: 0.75,
-              roughness: 0.5
-            });
-            child.material = emissiveMaterial;
-          }
-        });
-        model.traverse((child) => {
-          if (child.isMesh && child.name === 'Cylinder_1') {
-            const emissiveMaterial = new THREE.MeshStandardMaterial({
-              map: child.material.map,
-              emissiveMap: child.material.map,
-              roughnessMap: child.material.roughnessMap,
-              normalMap: child.material.normalMap,
-              metalness: 0.75,
-              roughness: 0.8,
-              normalScale: new THREE.Vector2(0.39, 0.39) // Increase the intensity of the normal map
-            });
-            child.material = emissiveMaterial;
-          }
-        });
-        model.traverse((child) => {
-          if (child.isMesh && (child.name === 'Cylinder_1' || child.name === 'rim_3')) {
-            child.receiveShadow = false;
-          }
-        });
-        scene.add(model);
+      child.material = emissiveMaterial;
+    }
+  });
 
+  scene.add(model);
 
         // load panorama HDR image
         new THREE.RGBELoader()
           .setDataType(THREE.UnsignedByteType)
-          .setPath('/textures/')
+          .setPath('./textures/')
           .load('reflection.hdr', function (texture) {
             var pmremGenerator = new THREE.PMREMGenerator(renderer);
             pmremGenerator.compileEquirectangularShader();
