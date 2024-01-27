@@ -77,10 +77,10 @@
     init();
     animate();
 
-    function init() {
+function init() {
       // create camera with perspective view
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 7.6;
+      camera.position.z = 5.6;
 
       // create scene
       scene = new THREE.Scene();
@@ -90,7 +90,7 @@
 var loader = new THREE.GLTFLoader();
 loader.load('./model/crypto.gltf', function (gltf) {
   model = gltf.scene;
-  model.scale.set(0.017, 0.017, 0.017);
+  model.scale.set(0.3, 0.3, 0.3);
 
   // add emissive materials to the model and the tracks
   model.traverse((child) => {
@@ -163,7 +163,7 @@ loader.load('./model/crypto.gltf', function (gltf) {
       controls.enablePan = false; // disable panning
 
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 12;
+      controls.autoRotateSpeed = 11;
       controls.enableDamping = true;
 
     }
