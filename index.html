@@ -97,8 +97,8 @@ loader.load('./model/crypto.gltf', function (gltf) {
     if (child.isMesh) {
       const emissiveMaterial = new THREE.MeshStandardMaterial({
         map: child.material.map,
-        metalness: 0,
-        roughness: 0,
+        metalness: 0.75,
+        roughness: 0.2,
         emissive: new THREE.Color(0xffbc54), 
         emissiveIntensity: 0.09,
         transmission: 0.8, 
